@@ -88,20 +88,23 @@ void update_screen_data()
     CGDataProviderRef data_ref = CGImageGetDataProvider(image_ref);
     CFDataRef color_data = CGDataProviderCopyData(data_ref);
     CFRange range = CFRangeMake(0, CFDataGetLength(color_data));
-
+    int bpl = CGImageGetBytesPerRow(img);
     char * data = (char*)CFDataGetBytePtr(color_data);
 
-    unsigned int items = range.length / 4;
+    unsigned int items = screen_width * screen_height;
     unsigned int new_len = items * 3;
 
     if (screen_data != NULL)
         delete screen_data;
 
     screen_data = new char[new_len];
-    for (int i = 0; i < items; i++) {
-        screen_data[i * 3] = data[i * 4];
-        screen_data[i * 3 + 1] = data[i * 4 + 1];
-        screen_data[i * 3 + 2] = data[i * 4 + 2];
+    for (int y = 0; y < screen_height; y++)
+    for (int x = 0; x < screen_width; x++) {
+        s_i = (y * screen_width + x) * 3;
+        m_i = y * bpl + x * 4;
+        screen_data[s_i] = data[m_i];
+        screen_data[s_i + 1] = data[m_i + 1];
+        screen_data[s_i + 2] = data[m_i + 2];
     }
 
     CFRelease(color_data);
@@ -145,16 +148,14 @@ void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
         CGDataProviderRef provider = CGImageGetDataProvider(img);
         CFDataRef data = CGDataProviderCopyData(provider);
         int bpl = CGImageGetBytesPerRow(img);
-        int bpp = CGImageGetBitsPerPixel(img);
-        std::cout << "refresh: " << bpl << " " << x << " " << y << " "
-            << width << " " << height << std::endl;
+        // int bpp = CGImageGetBitsPerPixel(img);
         const char *src = (char*)CFDataGetBytePtr(data);
 
         int s_i, m_i;
         for (int yy = 0; yy < height; yy++)
         for (int xx = 0; xx < width; xx++) {
             s_i = ((y + yy) * screen_width + (x + xx)) * 3;
-            m_i = (yy * width + xx) * 4;
+            m_i = yy * bpl + xx * 4;
             screen_data[s_i] = src[m_i];
             screen_data[s_i + 1] = src[m_i + 1];
             screen_data[s_i + 2] = src[m_i + 2];
