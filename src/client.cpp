@@ -52,17 +52,10 @@ void set_screen_data(char * data, unsigned int len)
     unsigned int pos = stream.read_uint32();
 
     mz_ulong uncomp_len = CHUNK_SIZE;
-    char * uncompressed = new char[uncomp_len];
     data += 4;
     len -= 4;
-    int ret = mz_uncompress((unsigned char*)uncompressed, &uncomp_len, 
-                            (unsigned char*)data, mz_ulong(len));
-    if (ret != MZ_OK) {
-        delete uncompressed;
-        return;
-    }
 
-    memcpy(screen_data + pos, uncompressed, uncomp_len);
+    memcpy(screen_data + pos, data, len);
     glBindTexture(GL_TEXTURE_2D, screen_tex);
 
     int w = 1024;
@@ -70,7 +63,6 @@ void set_screen_data(char * data, unsigned int len)
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGR,
         GL_UNSIGNED_BYTE, screen_data);
-    delete uncompressed;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -80,10 +72,12 @@ void set_screen_data(char * data, unsigned int len)
 
 void update_network()
 {
+    int max_events = 500;
     ENetEvent event;
-    while (true) {
-        if (enet_host_service(host, &event, 1) <= 0)
+    while (max_events > 0) {
+        if (enet_host_service(host, &event, 0) <= 0)
             break;
+        max_events--;
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
                 // event.peer->data
@@ -94,7 +88,7 @@ void update_network()
                 set_screen_data((char*)event.packet->data, 
                                 event.packet->dataLength);
                 enet_packet_destroy(event.packet);
-                std::cout << "Received update" << std::endl;
+                // std::cout << "Received update" << std::endl;
                 break;
             case ENET_EVENT_TYPE_DISCONNECT:
                 // event.peer->data;

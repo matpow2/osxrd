@@ -40,25 +40,13 @@ ENetHost * host = NULL;
 
 void broadcast_chunk(char * data, unsigned int pos, int len)
 {
-    char * compressed = new char[len];
-    mz_ulong comp_len = len;
-    int ret = mz_compress2((unsigned char*)compressed, &comp_len, 
-                           (unsigned char*)data + pos, mz_ulong(len), 
-                           MZ_BEST_COMPRESSION);
-
-    if (ret != MZ_OK) {
-        delete compressed;
-        return;
-    }
-
     DataStream stream;
     stream.write_uint32(pos);
-    stream.write(compressed, comp_len);
+    stream.write(data, len);
 
     ENetPacket * packet = enet_packet_create(stream.data, stream.size,
         ENET_PACKET_FLAG_UNSEQUENCED);
     enet_host_broadcast(host, 0, packet);
-    delete compressed;
 }
 
 void broadcast_screen()
