@@ -49,12 +49,12 @@ void write_file(const char * filename, char * data, unsigned int len)
 void set_screen_data(char * data, unsigned int len)
 {
     DataStream stream(data, len);
-    unsigned int pos = stream.read_uint32();
+    int pos = stream.read_uint32();
 
     data += 4;
     len -= 4;
 
-    memcpy(screen_data + pos, data, len);
+    memcpy(screen_data + pos * 3, data, len);
 }
 
 void update_network()

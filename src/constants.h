@@ -2,6 +2,5 @@
 #define OSXRD_CONSTANTS_H
 
 #define CHANNEL_COUNT 5
-#define CHUNK_SIZE 399
 
 #endif // OSXRD_CONSTANTS_H

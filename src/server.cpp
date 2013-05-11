@@ -32,6 +32,12 @@
 
 ENetHost * host = NULL;
 int peers = 0;
+char * screen_data = NULL;
+int screen_width;
+int screen_height;
+
+#define main_display kCGDirectMainDisplay
+// #define main_display CGMainDisplayID
 
 /*
 #define RELIABLE_PACKET ENET_PACKET_FLAG_RELIABLE
@@ -39,48 +45,62 @@ int peers = 0;
 #define UNSEQUENCED_PACKET ENET_PACKET_FLAG_UNSEQUENCED
 */
 
-void broadcast_chunk(char * data, unsigned int pos, int len)
+void broadcast_chunk(int x, int y, int len)
 {
     DataStream stream;
+    int pos = (y * screen_width + x);
     stream.write_uint32(pos);
-    stream.write(data + pos, len);
+    char * data = screen_data + pos * 3;
+    stream.write(data, len * 3);
     ENetPacket * packet = enet_packet_create(stream.data, stream.size,
         ENET_PACKET_FLAG_UNSEQUENCED);
     enet_host_broadcast(host, 0, packet);
 }
 
-void broadcast_screen()
+#define CHUNK_SIZE 120
+
+void broadcast_area(int x1, int y1, int x2, int y2)
 {
     if (peers == 0)
         return;
 
-    int width = CGDisplayPixelsWide(CGMainDisplayID());
-    int height = CGDisplayPixelsHigh(CGMainDisplayID());
+    int line_len = (x2 - x1);
+    int len = (x2 - x1) * (y2 - y1) * 3;
+    int s_len = screen_width * screen_height * 3;
+
+    for (int y = y1; y < y2; y++)
+    for (int x = x1; x < x2; x += CHUNK_SIZE) {
+        int len = std::min(x2 - x, CHUNK_SIZE);
+        broadcast_chunk(x, y, len);
+    }
+}
+
+void update_screen_data()
+{
+    screen_width = CGDisplayPixelsWide(kCGDirectMainDisplay);
+    screen_height = CGDisplayPixelsHigh(kCGDirectMainDisplay);
     CGImageRef image_ref = CGDisplayCreateImage(CGMainDisplayID());
     CGDataProviderRef data_ref = CGImageGetDataProvider(image_ref);
     CFDataRef color_data = CGDataProviderCopyData(data_ref);
     CFRange range = CFRangeMake(0, CFDataGetLength(color_data));
 
-    char * screen_data = new char[range.length];
-    CFDataGetBytes(color_data, range, (UInt8*)screen_data);
-    CFRelease(color_data);
-    CGImageRelease(image_ref);
+    char * data = (char*)CFDataGetBytePtr(color_data);
 
     unsigned int items = range.length / 4;
     unsigned int new_len = items * 3;
-    char * new_data = new char[new_len];
-    for (int i = 0; i < items; i++) {
-        new_data[i * 3] = screen_data[i * 4];
-        new_data[i * 3 + 1] = screen_data[i * 4 + 1];
-        new_data[i * 3 + 2] = screen_data[i * 4 + 2];
-    }
-    delete screen_data;
 
-    for (unsigned int i = 0; i < new_len; i += CHUNK_SIZE) {
-        unsigned int len = std::min(new_len - i, (unsigned int)(CHUNK_SIZE));
-        broadcast_chunk(new_data, i, len);
+    if (screen_data != NULL)
+        delete screen_data;
+
+    screen_data = new char[new_len];
+    for (int i = 0; i < items; i++) {
+        screen_data[i * 3] = data[i * 4];
+        screen_data[i * 3 + 1] = data[i * 4 + 1];
+        screen_data[i * 3 + 2] = data[i * 4 + 2];
     }
-    delete new_data;
+
+    CFRelease(color_data);
+    CGImageRelease(image_ref);
 }
 
 void update_network()
@@ -92,6 +112,7 @@ void update_network()
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
                 peers++;
+                broadcast_area(0, 0, screen_width, screen_height);
                 // event.peer->data
                 break;
             case ENET_EVENT_TYPE_RECEIVE:
@@ -104,6 +125,38 @@ void update_network()
                 // event.peer->data;
                 break;
         }
+    }
+}
+
+void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
+{
+    for (int i = 0; i < count; i++) {
+        CGRect & r = rects[i];
+        int x = r.origin.x;
+        int y = r.origin.y;
+        int width = r.size.width;
+        int height = r.size.height;
+        CGImageRef img = CGDisplayCreateImageForRect(main_display, r);
+        CGDataProviderRef provider = CGImageGetDataProvider(img);
+        CFDataRef data = CGDataProviderCopyData(provide);
+        int bpl = CGImageGetBytesPerRow(img);
+        int bpp = CGImageGetBitsPerPixel(img);
+        int data_width = width*(img_bpp/8);
+        const char *src = (char*)CFDataGetBytePtr(data);
+
+        int s_i, m_i;
+        for (int yy = 0; yy < height; y++)
+        for (int xx = 0; xx < width; x++) {
+            s_i = ((y + yy) * screen_width + (x + xx)) * 3;
+            m_i = (yy * width + xx) * 4;
+            screen_data[s_i] = src[m_i];
+            screen_data[s_i + 1] = src[m_i + 1];
+            screen_data[s_i + 2] = src[m_i + 2];
+        }
+
+        CGImageRelease(img);
+
+        broadcast_area(x, y, width, height);
     }
 }
 
@@ -126,16 +179,14 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    std::cout << "Running osxrd server on port " << address.port << std::endl;
+    CGRegisterScreenRefreshCallback(refresh_callback, NULL);
+    update_screen_data();
 
-    double send_time = get_time();
+    std::cout << "Running osxrd server on port " << address.port << std::endl;
 
     while (true) {
         update_network();
-        if (get_time() >= send_time) {
-            send_time += UPDATE_RATE;
-            broadcast_screen();
-        }
+        RunCurrentEventLoop(kEventDurationSecond * UPDATE_RATE);
         enet_host_flush(host);
     }
 
