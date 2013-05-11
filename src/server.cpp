@@ -88,7 +88,7 @@ void update_screen_data()
     CGDataProviderRef data_ref = CGImageGetDataProvider(image_ref);
     CFDataRef color_data = CGDataProviderCopyData(data_ref);
     CFRange range = CFRangeMake(0, CFDataGetLength(color_data));
-    int bpl = CGImageGetBytesPerRow(img);
+    int bpl = CGImageGetBytesPerRow(image_ref);
     char * data = (char*)CFDataGetBytePtr(color_data);
 
     unsigned int items = screen_width * screen_height;
@@ -98,6 +98,7 @@ void update_screen_data()
         delete screen_data;
 
     screen_data = new char[new_len];
+    int s_i, m_i;
     for (int y = 0; y < screen_height; y++)
     for (int x = 0; x < screen_width; x++) {
         s_i = (y * screen_width + x) * 3;
