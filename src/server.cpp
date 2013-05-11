@@ -129,9 +129,11 @@ int main(int argc, char **argv)
 
     while (true) {
         update_network();
-        while (get_time() >= send_time) {
+        if (get_time() >= send_time) {
             send_time += UPDATE_RATE;
+            double start = get_time();
             broadcast_screen();
+            std::cout << "Broadcast took " << (get_time() - start) << std::endl;
         }
         enet_host_flush(host);
     }
