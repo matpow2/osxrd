@@ -131,17 +131,17 @@ void update_network()
 void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
 {
     for (int i = 0; i < count; i++) {
-        CGRect & r = rects[i];
+        const CGRect & r = rects[i];
         int x = r.origin.x;
         int y = r.origin.y;
         int width = r.size.width;
         int height = r.size.height;
         CGImageRef img = CGDisplayCreateImageForRect(main_display, r);
         CGDataProviderRef provider = CGImageGetDataProvider(img);
-        CFDataRef data = CGDataProviderCopyData(provide);
-        int bpl = CGImageGetBytesPerRow(img);
-        int bpp = CGImageGetBitsPerPixel(img);
-        int data_width = width*(img_bpp/8);
+        CFDataRef data = CGDataProviderCopyData(provider);
+/*        int bpl = CGImageGetBytesPerRow(img);
+        int bpp = CGImageGetBitsPerPixel(img);*/
+        int data_width = width*4;
         const char *src = (char*)CFDataGetBytePtr(data);
 
         int s_i, m_i;
