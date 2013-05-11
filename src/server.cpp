@@ -31,6 +31,7 @@
 #include "miniz.c"
 
 ENetHost * host = NULL;
+int peers = 0;
 
 /*
 #define RELIABLE_PACKET ENET_PACKET_FLAG_RELIABLE
@@ -50,8 +51,7 @@ void broadcast_chunk(char * data, unsigned int pos, int len)
 
 void broadcast_screen()
 {
-    std::cout << host->peerCount << std::endl;
-    if (host->peerCount <= 0)
+    if (peers == 0)
         return;
 
     int width = CGDisplayPixelsWide(CGMainDisplayID());
@@ -91,6 +91,7 @@ void update_network()
             break;
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
+                peers++;
                 // event.peer->data
                 break;
             case ENET_EVENT_TYPE_RECEIVE:
@@ -99,6 +100,7 @@ void update_network()
                 enet_packet_destroy(event.packet);
                 break;
             case ENET_EVENT_TYPE_DISCONNECT:
+                peers--;
                 // event.peer->data;
                 break;
         }
@@ -132,9 +134,7 @@ int main(int argc, char **argv)
         update_network();
         if (get_time() >= send_time) {
             send_time += UPDATE_RATE;
-            double start = get_time();
             broadcast_screen();
-            std::cout << "Broadcast took " << (get_time() - start) << std::endl;
         }
         enet_host_flush(host);
     }
