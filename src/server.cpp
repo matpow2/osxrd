@@ -136,7 +136,6 @@ void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
         int y = r.origin.y;
         int width = r.size.width;
         int height = r.size.height;
-        std::cout << "refresh: " << x << " " << y << " " << width << " " << height << std::endl;
         CGImageRef img = CGDisplayCreateImageForRect(main_display, r);
         CGDataProviderRef provider = CGImageGetDataProvider(img);
         CFDataRef data = CGDataProviderCopyData(provider);
