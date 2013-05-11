@@ -183,9 +183,16 @@ int main(int argc, char **argv)
 
     std::cout << "Running osxrd server on port " << address.port << std::endl;
 
+    double debug_time = get_time();
+
     while (true) {
         update_network();
         RunCurrentEventLoop(kEventDurationSecond * UPDATE_RATE);
+        if (get_time() >= debug_time) {
+            debug_time += 1.0f;
+            std::cout << "data per second: " << host->totalSentData << std::endl;
+            host->totalSentData = 0;
+        }
     }
 
     enet_host_destroy(host);
