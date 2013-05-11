@@ -146,7 +146,8 @@ void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
         CFDataRef data = CGDataProviderCopyData(provider);
         int bpl = CGImageGetBytesPerRow(img);
         int bpp = CGImageGetBitsPerPixel(img);
-        std::cout << "refresh: " << bpl << " " << bpp << std::endl;
+        std::cout << "refresh: " << bpl << " " << x << " " << y << " "
+            << width << " " << height std::endl;
         const char *src = (char*)CFDataGetBytePtr(data);
 
         int s_i, m_i;
