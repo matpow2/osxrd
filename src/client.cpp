@@ -142,6 +142,7 @@ int main(int argc, char **argv)
     enet_initialize();
 
     host = enet_host_create(NULL, 1, CHANNEL_COUNT, 0, 0);
+    enet_host_compress_with_range_coder(host);
 
     if (host == NULL) {
         std::cerr << "Could not initialize host" << std::endl;

@@ -86,7 +86,7 @@ void update_network()
 {
     ENetEvent event;
     while (true) {
-        if (enet_host_service(host, &event, 1) <= 0)
+        if (enet_host_service(host, &event, 0) <= 0)
             break;
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
@@ -116,6 +116,7 @@ int main(int argc, char **argv)
     address.port = 7171;
 
     host = enet_host_create(&address, MAX_CONNECTIONS, CHANNEL_COUNT, 0, 0);
+    enet_host_compress_with_range_coder(host);
 
     if (host == NULL) {
         std::cerr << "Could not initialize host" << std::endl;
