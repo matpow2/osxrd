@@ -55,6 +55,10 @@ endif()
 find_package(ENet REQUIRED)
 find_package(GLFW)
 
+if(APPLE)
+    find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
+endif()
+
 set(COMMON_INCLUDES
     ${ENET_INCLUDE_DIR}
 )
@@ -74,15 +78,6 @@ if(WIN32)
         winmm
         ws2_32
     )
-endif()
-
-if(WIN32)
-    set(COMMON_LIBS
-        ${COMMON_LIBS}
-        winmm
-        ws2_32
-    )
-endif()
 
 set(COMMON_LIBS
     ${COMMON_LIBS}
@@ -97,6 +92,12 @@ set(CLIENT_LIBS
 set(SERVER_LIBS
     ${COMMON_LIBS}
 )
+
+if (APPLE)
+    set(SERVER_LIBS
+        ${CORE_FOUNDATION_FRAMEWORK}
+        ${SERVER_LIBS})
+endif()
 
 # build
 
