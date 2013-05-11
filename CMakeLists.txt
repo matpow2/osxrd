@@ -78,6 +78,7 @@ if(WIN32)
         winmm
         ws2_32
     )
+endif()
 
 set(COMMON_LIBS
     ${COMMON_LIBS}
