@@ -144,8 +144,9 @@ void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
         CGImageRef img = CGDisplayCreateImageForRect(main_display, r);
         CGDataProviderRef provider = CGImageGetDataProvider(img);
         CFDataRef data = CGDataProviderCopyData(provider);
-/*        int bpl = CGImageGetBytesPerRow(img);
-        int bpp = CGImageGetBitsPerPixel(img);*/
+        int bpl = CGImageGetBytesPerRow(img);
+        int bpp = CGImageGetBitsPerPixel(img);
+        std::cout << "refresh: " << bpl << " " << bpp << std::endl;
         const char *src = (char*)CFDataGetBytePtr(data);
 
         int s_i, m_i;
@@ -158,6 +159,7 @@ void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
             screen_data[s_i + 2] = src[m_i + 2];
         }
 
+        CFRelease(data);
         CGImageRelease(img);
 
         broadcast_area(x, y, width, height);
