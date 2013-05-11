@@ -52,7 +52,7 @@ void broadcast_screen()
     CFRelease(color_data);
     CGImageRelease(image_ref);
     ENetPacket * packet = enet_packet_create(screen_data, range.length,
-        ENET_PACKET_FLAG_UNSEQUENCED);
+        ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast(host, 0, packet);
 }
 
@@ -78,7 +78,7 @@ void update_network()
     }
 }
 
-#define UPDATE_RATE 0.5f
+#define UPDATE_RATE (1 / 30.0f)
 
 int main(int argc, char **argv)
 {
@@ -108,7 +108,6 @@ int main(int argc, char **argv)
             continue;
         send_time = get_time() + UPDATE_RATE;
         broadcast_screen();
-        std::cout << "Broadcast!" << std::endl;
         enet_host_flush(host);
     }
 

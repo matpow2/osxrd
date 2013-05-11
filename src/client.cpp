@@ -21,9 +21,45 @@
 #include <enet/enet.h>
 #include "timer.h"
 #include "constants.h"
+#include "include_gl.h"
+#include <fstream>
+
+#ifndef GL_BGRA
+#define GL_BGRA 0x80E1
+#endif
 
 ENetHost * host = NULL;
 ENetPeer * peer = NULL;
+GLFWwindow * window = NULL;
+GLuint screen_tex;
+bool has_data = false;
+
+void write_file(const char * filename, char * data, unsigned int len)
+{
+    std::ofstream fp(filename, std::ios::binary | std::ios::out);
+    fp.write(data, len);
+    fp.close();
+}
+
+void set_screen_data(char * data, unsigned int len)
+{
+    write_file("debug.dat", data, len);
+    has_data = true;
+    glBindTexture(GL_TEXTURE_2D, screen_tex);
+
+    int w = 1024;
+    int h = 768;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, w, h, 0, GL_BGRA,
+        GL_UNSIGNED_BYTE, data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+
+}
 
 void update_network()
 {
@@ -37,8 +73,11 @@ void update_network()
                 break;
             case ENET_EVENT_TYPE_RECEIVE:
                 std::cout << "Hello!" << std::endl;
+                std::cout << event.packet->dataLength << std::endl;
                 // peer = event.peer->data;
                 // packet = (char*)event.packet->data, event.packet->dataLength;
+                set_screen_data((char*)event.packet->data, 
+                                event.packet->dataLength);
                 enet_packet_destroy(event.packet);
                 break;
             case ENET_EVENT_TYPE_DISCONNECT:
@@ -46,6 +85,50 @@ void update_network()
                 break;
         }
     }
+}
+
+void _error_callback(int error, const char * msg)
+{
+    std::cout << "Window error (" << error << "): " << msg << std::endl;
+}
+
+void draw()
+{
+    if (!has_data)
+        return;
+
+    glViewport(0, 0, 1024, 768);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, 1024, 0, 768, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    glBindTexture(GL_TEXTURE_2D, screen_tex);
+
+    float tex_coords[8];
+    tex_coords[0] = 0.0; tex_coords[1] = 1.0;
+    tex_coords[2] = 1.0; tex_coords[3] = 1.0;
+    tex_coords[4] = 1.0; tex_coords[5] = 0.0;
+    tex_coords[6] = 0.0; tex_coords[7] = 0.0;
+
+    int width = 1024;
+    int height = 768;
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(tex_coords[0], tex_coords[1]);
+    glVertex2f(0, 0);
+    glTexCoord2f(tex_coords[2], tex_coords[3]);
+    glVertex2f(width, 0);
+    glTexCoord2f(tex_coords[4], tex_coords[5]);
+    glVertex2f(width, height);
+    glTexCoord2f(tex_coords[6], tex_coords[7]);
+    glVertex2f(0, height);
+    glEnd();
+
+    glfwSwapBuffers(window);
 }
 
 int main(int argc, char **argv)
@@ -66,10 +149,40 @@ int main(int argc, char **argv)
     address.port = 7171;
     peer = enet_host_connect(host, &address, CHANNEL_COUNT, 0);
 
+    // set up window
+
+    glfwSetErrorCallback(_error_callback);
+
+    if(!glfwInit()) {
+        return 0;
+    }
+
+    window = glfwCreateWindow(1024, 768, "osxrd", NULL, NULL);
+    glfwMakeContextCurrent(window);
+    if (false) // vsync
+        glfwSwapInterval(1);
+    else
+        glfwSwapInterval(0);
+
+/*    glfwSetMouseButtonCallback(window, _mouse_callback);
+    glfwSetCursorPosCallback(window, _mouse_move_callback);
+    glfwSetKeyCallback(window, _button_callback);
+    glfwSetCharCallback(window, _char_callback);
+    glfwSetScrollCallback(window, _mouse_scroll_callback);
+    glfwSetWindowSizeCallback(window, _resize_callback);*/
+
+    // OpenGL init
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &screen_tex);
+
     std::cout << "Running osxrd client" << std::endl;
 
     while (true) {
+        glfwPollEvents();
+        if (glfwWindowShouldClose(window))
+            break;
         update_network();
+        draw();
     }
 
     enet_host_destroy(host);

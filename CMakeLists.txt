@@ -55,6 +55,7 @@ if(WIN32)
 endif()
 
 find_package(ENet REQUIRED)
+find_package(OpenGL)
 find_package(GLFW)
 
 if(APPLE)
@@ -90,6 +91,7 @@ set(COMMON_LIBS
 
 set(CLIENT_LIBS
     ${COMMON_LIBS}
+    ${OPENGL_LIBRARY}
     ${GLFW_LIBRARY}
 )
 
