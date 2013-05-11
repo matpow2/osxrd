@@ -152,7 +152,7 @@ int main(int argc, char **argv)
     }
 
     ENetAddress address;
-    enet_address_set_host(&address, "192.168.123.15");
+    enet_address_set_host(&address, "192.168.2.4");
     address.port = 7171;
     peer = enet_host_connect(host, &address, CHANNEL_COUNT, 0);
 
@@ -185,11 +185,15 @@ int main(int argc, char **argv)
 
     std::cout << "Running osxrd client" << std::endl;
 
+    double t = get_time();
+
     while (true) {
         glfwPollEvents();
         if (glfwWindowShouldClose(window))
             break;
         update_network();
+        double dt = get_time() - t;
+        t = get_time();
         draw();
     }
 
