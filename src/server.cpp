@@ -61,9 +61,9 @@ void broadcast_screen()
     delete screen_data;
 
     char * compressed = new char[new_len];
-    mz_long comp_len = new_len;
+    mz_ulong comp_len = new_len;
     int ret = mz_compress2((unsigned char*)compressed, &comp_len, 
-                           (unsigned char*)new_data, mz_long(new_len), 
+                           (unsigned char*)new_data, mz_ulong(new_len), 
                            MZ_BEST_COMPRESSION);
     delete new_data;
 
