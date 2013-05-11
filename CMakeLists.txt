@@ -102,9 +102,11 @@ include_directories(${CMAKE_INCLUDE_PATH})
 
 if (WINDOWS)
     set(BUILD_CLIENT ON)
+endif()
 
 if (OSX)
     set(BUILD_SERVER ON)
+endif()
 
 if (BUILD_CLIENT)
     add_executable(client ${CLIENTSRCS})
