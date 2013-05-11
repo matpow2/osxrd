@@ -141,12 +141,11 @@ void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
         CFDataRef data = CGDataProviderCopyData(provider);
 /*        int bpl = CGImageGetBytesPerRow(img);
         int bpp = CGImageGetBitsPerPixel(img);*/
-        int data_width = width*4;
         const char *src = (char*)CFDataGetBytePtr(data);
 
         int s_i, m_i;
-        for (int yy = 0; yy < height; y++)
-        for (int xx = 0; xx < width; x++) {
+        for (int yy = 0; yy < height; yy++)
+        for (int xx = 0; xx < width; xx++) {
             s_i = ((y + yy) * screen_width + (x + xx)) * 3;
             m_i = (yy * width + xx) * 4;
             screen_data[s_i] = src[m_i];
@@ -179,8 +178,8 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    CGRegisterScreenRefreshCallback(refresh_callback, NULL);
     update_screen_data();
+    CGRegisterScreenRefreshCallback(refresh_callback, NULL);
 
     std::cout << "Running osxrd server on port " << address.port << std::endl;
 
