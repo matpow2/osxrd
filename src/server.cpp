@@ -38,7 +38,7 @@ ENetHost * host = NULL;
 #define UNSEQUENCED_PACKET ENET_PACKET_FLAG_UNSEQUENCED
 */
 
-void broadcast_chunk(char * data, int pos, int len)
+void broadcast_chunk(char * data, unsigned int pos, int len)
 {
     char * compressed = new char[len];
     mz_ulong comp_len = len;
@@ -88,8 +88,8 @@ void broadcast_screen()
     }
     delete screen_data;
 
-    for (int i = 0; i < new_len; i += CHUNK_SIZE) {
-        int len = std::min(new_len - i, CHUNK_SIZE);
+    for (unsigned int i = 0; i < new_len; i += CHUNK_SIZE) {
+        unsigned int len = std::min(new_len - i, (unsigned int)(CHUNK_SIZE));
         broadcast_chunk(new_data, i, len);
     }
     delete new_data;
