@@ -27,6 +27,8 @@
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz.c"
 
+#include "jpgd.h"
+
 #ifndef GL_BGRA
 #define GL_BGR 0x80E0
 #endif
@@ -46,7 +48,7 @@ void write_file(const char * filename, char * data, unsigned int len)
 
 void set_screen_data(char * data, unsigned int len)
 {
-    mz_ulong uncomp_len = 1024 * 768;
+    mz_ulong uncomp_len = 1024 * 768 * 3;
     char * uncompressed = new char[uncomp_len];
     int ret = mz_uncompress((unsigned char*)uncompressed, &uncomp_len, 
                             (unsigned char*)data, mz_ulong(len));
@@ -82,13 +84,12 @@ void update_network()
                 // event.peer->data
                 break;
             case ENET_EVENT_TYPE_RECEIVE:
-                std::cout << "Hello!" << std::endl;
-                std::cout << event.packet->dataLength << std::endl;
                 // peer = event.peer->data;
                 // packet = (char*)event.packet->data, event.packet->dataLength;
                 set_screen_data((char*)event.packet->data, 
                                 event.packet->dataLength);
                 enet_packet_destroy(event.packet);
+                std::cout << "Received update" << std::endl;
                 break;
             case ENET_EVENT_TYPE_DISCONNECT:
                 // event.peer->data;
@@ -151,8 +152,6 @@ int main(int argc, char **argv)
         std::cerr << "Could not initialize host" << std::endl;
         return 0;
     }
-
-    enet_host_compress_with_range_coder(host);
 
     ENetAddress address;
     enet_address_set_host(&address, "192.168.123.15");

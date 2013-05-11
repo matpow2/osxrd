@@ -24,11 +24,13 @@ set(COMMONSRCS
 
 set(CLIENTSRCS
     ${COMMONSRCS}
+    ${SRC_DIR}/jpgd.cpp
     ${SRC_DIR}/client.cpp
 )
 
 set(SERVERSRCS
     ${COMMONSRCS}
+    ${SRC_DIR}/jpge.cpp
     ${SRC_DIR}/server.cpp
 )
 

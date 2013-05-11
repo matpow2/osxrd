@@ -28,6 +28,9 @@
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz.c"
 
+#include "jpge.h"
+using namespace jpge;
+
 ENetHost * host = NULL;
 
 /*
@@ -38,6 +41,9 @@ ENetHost * host = NULL;
 
 void broadcast_screen()
 {
+    if (host->peerCount <= 0)
+        return;
+
     int width = CGDisplayPixelsWide(CGMainDisplayID());
     int height = CGDisplayPixelsHigh(CGMainDisplayID());
     CGImageRef image_ref = CGDisplayCreateImage(CGMainDisplayID());
@@ -118,19 +124,17 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    enet_host_compress_with_range_coder(host);
-
     std::cout << "Running osxrd server on port " << address.port << std::endl;
 
     double send_time = get_time();
 
     while (true) {
         update_network();
-        if (get_time() < send_time)
-            continue;
-        send_time = get_time() + UPDATE_RATE;
-        broadcast_screen();
-        enet_host_flush(host);
+        if (get_time() >= send_time) {
+            send_time = get_time() + UPDATE_RATE;
+            broadcast_screen();
+        }
+        // enet_host_flush(host);
     }
 
     enet_host_destroy(host);
