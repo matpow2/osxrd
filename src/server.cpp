@@ -140,7 +140,6 @@ void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
         CGDataProviderRef provider = CGImageGetDataProvider(img);
         CFDataRef data = CGDataProviderCopyData(provider);
         int bpl = CGImageGetBytesPerRow(img);
-        // int bpp = CGImageGetBitsPerPixel(img);
         const char *src = (char*)CFDataGetBytePtr(data);
 
         int s_i, m_i;
@@ -186,8 +185,9 @@ int main(int argc, char **argv)
 
     while (true) {
         update_network();
+        double t = get_time();
         RunCurrentEventLoop(kEventDurationSecond * UPDATE_RATE);
-        enet_host_flush(host);
+        std::cout << "update took: " << (get_time() - t) << std::endl;
     }
 
     enet_host_destroy(host);
