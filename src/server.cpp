@@ -86,7 +86,7 @@ void update_network()
 {
     ENetEvent event;
     while (true) {
-        if (enet_host_service(host, &event, 0) <= 0)
+        if (enet_host_service(host, &event, 1) <= 0)
             break;
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
@@ -129,10 +129,10 @@ int main(int argc, char **argv)
 
     while (true) {
         update_network();
-        if (get_time() >= send_time) {
+        //if (get_time() >= send_time) {
+        if (true) {
             send_time = get_time() + UPDATE_RATE;
             broadcast_screen();
-            std::cout << "sent!" << std::endl;
         }
         // enet_host_flush(host);
     }

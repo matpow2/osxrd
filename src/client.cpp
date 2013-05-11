@@ -59,12 +59,10 @@ void set_screen_data(char * data, unsigned int len)
 
 void update_network()
 {
-    int max_events = 800;
     ENetEvent event;
     while (true) {
-        if (enet_host_service(host, &event, 0) <= 0)
+        if (enet_host_service(host, &event, 1) <= 0)
             break;
-        max_events--;
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
                 // event.peer->data
