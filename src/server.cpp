@@ -52,8 +52,7 @@ void broadcast_chunk(int x, int y, int len)
     stream.write_uint32(pos);
     char * data = screen_data + pos * 3;
     stream.write(data, len * 3);
-    ENetPacket * packet = enet_packet_create(stream.data, stream.size,
-        ENET_PACKET_FLAG_UNSEQUENCED);
+    ENetPacket * packet = enet_packet_create(stream.data, stream.size);
     enet_host_broadcast(host, 0, packet);
 }
 
