@@ -63,6 +63,7 @@ find_package(GLFW)
 if(APPLE)
     find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
     find_library(APP_SERVICES_LIBRARY ApplicationServices)
+    find_library(CARBON_LIBRARY Carbon)
 endif()
 
 set(COMMON_INCLUDES
@@ -105,6 +106,7 @@ if (APPLE)
     set(SERVER_LIBS
         ${CORE_FOUNDATION_FRAMEWORK}
         ${APP_SERVICES_LIBRARY}
+        ${CARBON_LIBRARY}
         ${SERVER_LIBS})
 endif()
 
