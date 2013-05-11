@@ -129,12 +129,11 @@ int main(int argc, char **argv)
 
     while (true) {
         update_network();
-        //if (get_time() >= send_time) {
-        if (true) {
-            send_time = get_time() + UPDATE_RATE;
+        while (get_time() >= send_time) {
+            send_time += UPDATE_RATE;
             broadcast_screen();
         }
-        // enet_host_flush(host);
+        enet_host_flush(host);
     }
 
     enet_host_destroy(host);
