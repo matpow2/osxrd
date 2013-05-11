@@ -76,7 +76,7 @@ void broadcast_screen()
     }
 
     ENetPacket * packet = enet_packet_create(compressed, comp_len,
-        ENET_PACKET_FLAG_RELIABLE);
+        ENET_PACKET_FLAG_RELIABLE | ENET_PACKET_FLAG_UNSEQUENCED);
     enet_host_broadcast(host, 0, packet);
     delete compressed;
 }

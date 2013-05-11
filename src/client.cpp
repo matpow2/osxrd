@@ -180,6 +180,7 @@ int main(int argc, char **argv)
 
     // OpenGL init
     glEnable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
     glGenTextures(1, &screen_tex);
 
     std::cout << "Running osxrd client" << std::endl;
