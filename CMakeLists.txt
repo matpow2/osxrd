@@ -17,7 +17,7 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH}
 )
 
-# set(COMMONSRCS
+set(COMMONSRCS
     ${SRC_DIR}/timer.cpp
 )
 
