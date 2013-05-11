@@ -61,7 +61,7 @@ void update_network()
 {
     ENetEvent event;
     while (true) {
-        if (enet_host_service(host, &event, 1) <= 0)
+        if (enet_host_service(host, &event, 0) <= 0)
             break;
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
@@ -190,8 +190,6 @@ int main(int argc, char **argv)
         if (glfwWindowShouldClose(window))
             break;
         update_network();
-        double dt = get_time() - t;
-        t = get_time();
         draw();
     }
 

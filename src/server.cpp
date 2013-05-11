@@ -64,8 +64,6 @@ void broadcast_area(int x1, int y1, int x2, int y2)
     if (peers == 0)
         return;
 
-    int len = (x2 - x1) * (y2 - y1) * 3;
-
     for (int y = y1; y < y2; y++)
     for (int x = x1; x < x2; x += CHUNK_SIZE) {
         int len = std::min(x2 - x, CHUNK_SIZE);
@@ -159,7 +157,7 @@ void refresh_callback(CGRectCount count, const CGRect *rects, void *ignore)
         CFRelease(data);
         CGImageRelease(img);
 
-        broadcast_area(x, y, width, height);
+        broadcast_area(x, y, x + width, y + height);
     }
 }
 
