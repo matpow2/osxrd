@@ -27,6 +27,8 @@
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz.c"
 
+#include "datastream.h"
+
 #ifndef GL_BGRA
 #define GL_BGR 0x80E0
 #endif
@@ -34,8 +36,8 @@
 ENetHost * host = NULL;
 ENetPeer * peer = NULL;
 GLFWwindow * window = NULL;
+char * screen_data;
 GLuint screen_tex;
-bool has_data = false;
 
 void write_file(const char * filename, char * data, unsigned int len)
 {
@@ -46,8 +48,13 @@ void write_file(const char * filename, char * data, unsigned int len)
 
 void set_screen_data(char * data, unsigned int len)
 {
-    mz_ulong uncomp_len = 1024 * 768 * 3;
+    DataStream stream(data, len);
+    unsigned int pos = stream.read_uint32();
+
+    mz_ulong uncomp_len = CHUNK_SIZE;
     char * uncompressed = new char[uncomp_len];
+    data += 4;
+    len -= 4;
     int ret = mz_uncompress((unsigned char*)uncompressed, &uncomp_len, 
                             (unsigned char*)data, mz_ulong(len));
     if (ret != MZ_OK) {
@@ -55,14 +62,14 @@ void set_screen_data(char * data, unsigned int len)
         return;
     }
 
-    has_data = true;
+    memcpy(screen_data + pos, uncompressed, uncomp_len);
     glBindTexture(GL_TEXTURE_2D, screen_tex);
 
     int w = 1024;
     int h = 768;
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGR,
-        GL_UNSIGNED_BYTE, uncompressed);
+        GL_UNSIGNED_BYTE, screen_data);
     delete uncompressed;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -103,9 +110,6 @@ void _error_callback(int error, const char * msg)
 
 void draw()
 {
-    if (!has_data)
-        return;
-
     glViewport(0, 0, 1024, 768);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -182,6 +186,7 @@ int main(int argc, char **argv)
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
     glGenTextures(1, &screen_tex);
+    screen_data = new char[1024 * 768 * 3];
 
     std::cout << "Running osxrd client" << std::endl;
 

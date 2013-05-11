@@ -28,6 +28,8 @@
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz.c"
 
+#include "datastream.h"
+
 ENetHost * host = NULL;
 
 /*
@@ -35,6 +37,29 @@ ENetHost * host = NULL;
 #define UNRELIABLE_PACKET
 #define UNSEQUENCED_PACKET ENET_PACKET_FLAG_UNSEQUENCED
 */
+
+void broadcast_chunk(char * data, int pos, int len)
+{
+    char * compressed = new char[len];
+    mz_ulong comp_len = len;
+    int ret = mz_compress2((unsigned char*)compressed, &comp_len, 
+                           (unsigned char*)new_data + pos, mz_ulong(len), 
+                           MZ_BEST_COMPRESSION);
+
+    if (ret != MZ_OK) {
+        delete compressed;
+        return;
+    }
+
+    DataStream stream;
+    stream.write_uint32(pos);
+    stream.write(compressed, comp_len);
+
+    ENetPacket * packet = enet_packet_create(stream.data, stream.size,
+        ENET_PACKET_FLAG_UNSEQUENCED);
+    enet_host_broadcast(host, 0, packet);
+    delete compressed;
+}
 
 void broadcast_screen()
 {
@@ -63,22 +88,11 @@ void broadcast_screen()
     }
     delete screen_data;
 
-    char * compressed = new char[new_len];
-    mz_ulong comp_len = new_len;
-    int ret = mz_compress2((unsigned char*)compressed, &comp_len, 
-                           (unsigned char*)new_data, mz_ulong(new_len), 
-                           MZ_BEST_COMPRESSION);
-    delete new_data;
-
-    if (ret != MZ_OK) {
-        delete compressed;
-        return;
+    for (int i = 0; i < new_len; i += CHUNK_SIZE) {
+        int len = std::min(new_len - i, CHUNK_SIZE);
+        broadcast_chunk(new_data, i, len);
     }
-
-    ENetPacket * packet = enet_packet_create(compressed, comp_len,
-        ENET_PACKET_FLAG_UNSEQUENCED);
-    enet_host_broadcast(host, 0, packet);
-    delete compressed;
+    delete new_data;
 }
 
 void update_network()

@@ -18,6 +18,7 @@ set(CMAKE_MODULE_PATH
 )
 
 set(COMMONSRCS
+    ${SRC_DIR}/datastream.cpp
     ${SRC_DIR}/miniz.c
     ${SRC_DIR}/timer.cpp
 )
