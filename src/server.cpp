@@ -78,7 +78,7 @@ void update_network()
     }
 }
 
-#define UPDATE_RATE (1 / 30.0f)
+#define UPDATE_RATE 0.5f
 
 int main(int argc, char **argv)
 {
