@@ -50,6 +50,7 @@ void broadcast_chunk(char * data, unsigned int pos, int len)
 
 void broadcast_screen()
 {
+    std::cout << host->peerCount << std::endl;
     if (host->peerCount <= 0)
         return;
 
