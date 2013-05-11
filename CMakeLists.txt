@@ -17,7 +17,9 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH}
 )
 
-# set(COMMONSRCS)
+# set(COMMONSRCS
+    ${SRC_DIR}/timer.cpp
+)
 
 set(CLIENTSRCS
     ${COMMONSRCS}
@@ -57,6 +59,7 @@ find_package(GLFW)
 
 if(APPLE)
     find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
+    find_library(APP_SERVICES_LIBRARY ApplicationServices)
 endif()
 
 set(COMMON_INCLUDES
@@ -97,6 +100,7 @@ set(SERVER_LIBS
 if (APPLE)
     set(SERVER_LIBS
         ${CORE_FOUNDATION_FRAMEWORK}
+        ${APP_SERVICES_LIBRARY}
         ${SERVER_LIBS})
 endif()
 
