@@ -1,28 +1,36 @@
+/*    
+    Copyright (c) 2013 Mathias Kaerlev
+
+    This file is part of osxrd.
+
+    osxrd is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    osxrd is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with osxrd.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #define MAX_CONNECTIONS 5
-#define MAX_CHANNELS 5
 
 #include <iostream>
+#include <enet/enet.h>
+#include "timer.h"
+#include "constants.h"
 
-int main(int argc, char **argv)
+ENetHost * host = NULL;
+
+void update_network()
 {
-    enet_initialize();
-
-    ENetAdress address;
-    address.host = ENET_HOST_ANY;
-    address.port = 7171;
-
-    ENetHost * host = enet_host_create(&address, MAX_CONNECTIONS, MAX_CHANNELS,
-                                       0, 0);
-
-    if (host == NULL) {
-        std::cerr << "Could not initialize host" << std::endl;
-        return 0;
-    }
-
-    enet_host_compress_with_range_coder(host);
-
+    ENetEvent event;
     while (true) {
-        if (enet_host_service(host, &event, timeout) <= 0)
+        if (enet_host_service(host, &event, 1) <= 0)
             break;
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
@@ -37,6 +45,28 @@ int main(int argc, char **argv)
                 // event.peer->data;
                 break;
         }
+    }
+}
+
+int main(int argc, char **argv)
+{
+    enet_initialize();
+
+    ENetAddress address;
+    address.host = ENET_HOST_ANY;
+    address.port = 7171;
+
+    host = enet_host_create(&address, MAX_CONNECTIONS, CHANNEL_COUNT, 0, 0);
+
+    if (host == NULL) {
+        std::cerr << "Could not initialize host" << std::endl;
+        return 0;
+    }
+
+    enet_host_compress_with_range_coder(host);
+
+    while (true) {
+        update_network();
     }
 
     enet_host_destroy(host);

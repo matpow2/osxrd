@@ -1,6 +1,6 @@
 # project
 
-project(OSXRD)
+project(osxrd)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 set(SRC_DIR "${ROOT_DIR}/src")
@@ -17,19 +17,19 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH}
 )
 
-set(COMMONSRCS "")
+# set(COMMONSRCS)
 
 set(CLIENTSRCS
-    ${COMMONSRCS}
-    ${SRC_DIR}/server.cpp
-)
-
-set(SERVERSRCS
     ${COMMONSRCS}
     ${SRC_DIR}/client.cpp
 )
 
-if(WINDOWS)
+set(SERVERSRCS
+    ${COMMONSRCS}
+    ${SRC_DIR}/server.cpp
+)
+
+if(WIN32)
     set(CLIENTSRCS
         ${CLIENTSRCS}
     )
@@ -38,14 +38,16 @@ endif()
 # dependencies
 
 set(CMAKE_LIBRARY_PATH "${ROOT_DIR}/lib" ${CMAKE_LIBRARY_PATH})
-if(WINDOWS)
+if(WIN32)
     set(CMAKE_LIBRARY_PATH "${ROOT_DIR}/lib/win32"
         ${CMAKE_LIBRARY_PATH})
 endif()
 
+message(${CMAKE_LIBRARY_PATH})
+
 set(CMAKE_INCLUDE_PATH ${SRC_DIR} "${ROOT_DIR}/include"
     ${CMAKE_INCLUDE_PATH})
-if(WINDOWS)
+if(WIN32)
     set(CMAKE_INCLUDE_PATH "${ROOT_DIR}/include/win32"
         ${CMAKE_INCLUDE_PATH})
 endif()
@@ -66,7 +68,7 @@ set(SERVER_INCLUDES
     ${COMMON_INCLUDES}
 )
 
-if(WINDOWS)
+if(WIN32)
     set(COMMON_LIBS
         ${COMMON_LIBS}
         winmm
@@ -74,7 +76,7 @@ if(WINDOWS)
     )
 endif()
 
-if(WINDOWS)
+if(WIN32)
     set(COMMON_LIBS
         ${COMMON_LIBS}
         winmm
@@ -100,11 +102,11 @@ set(SERVER_LIBS
 
 include_directories(${CMAKE_INCLUDE_PATH})
 
-if (WINDOWS)
+if (WIN32)
     set(BUILD_CLIENT ON)
 endif()
 
-if (OSX)
+if (APPLE)
     set(BUILD_SERVER ON)
 endif()
 
