@@ -55,25 +55,13 @@ void set_screen_data(char * data, unsigned int len)
     len -= 4;
 
     memcpy(screen_data + pos, data, len);
-    glBindTexture(GL_TEXTURE_2D, screen_tex);
-
-    int w = 1024;
-    int h = 768;
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGR,
-        GL_UNSIGNED_BYTE, screen_data);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 }
 
 void update_network()
 {
-    int max_events = 1;
+    int max_events = 800;
     ENetEvent event;
-    while (max_events > 0) {
+    while (true) {
         if (enet_host_service(host, &event, 0) <= 0)
             break;
         max_events--;
@@ -103,6 +91,7 @@ void _error_callback(int error, const char * msg)
 
 void draw()
 {
+
     glViewport(0, 0, 1024, 768);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -112,7 +101,19 @@ void draw()
     glClear(GL_COLOR_BUFFER_BIT);
 
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
     glBindTexture(GL_TEXTURE_2D, screen_tex);
+
+    int w = 1024;
+    int h = 768;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGR,
+        GL_UNSIGNED_BYTE, screen_data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
     float tex_coords[8];
     tex_coords[0] = 0.0; tex_coords[1] = 1.0;
