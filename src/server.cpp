@@ -24,11 +24,11 @@
 #include "timer.h"
 #include "constants.h"
 #include <Carbon/Carbon.h>
+#include "datastream.h"
+#include <algorithm>
 
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz.c"
-
-#include "datastream.h"
 
 ENetHost * host = NULL;
 
@@ -43,7 +43,7 @@ void broadcast_chunk(char * data, int pos, int len)
     char * compressed = new char[len];
     mz_ulong comp_len = len;
     int ret = mz_compress2((unsigned char*)compressed, &comp_len, 
-                           (unsigned char*)new_data + pos, mz_ulong(len), 
+                           (unsigned char*)data + pos, mz_ulong(len), 
                            MZ_BEST_COMPRESSION);
 
     if (ret != MZ_OK) {
