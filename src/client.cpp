@@ -50,7 +50,7 @@ void set_screen_data(char * data, unsigned int len)
     int w = 1024;
     int h = 768;
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, w, h, 0, GL_BGRA,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_BGR, w, h, 0, GL_BGR,
         GL_UNSIGNED_BYTE, data);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
