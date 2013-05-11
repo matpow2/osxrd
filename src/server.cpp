@@ -27,6 +27,7 @@
 #include <Carbon/Carbon.h>
 
 ENetHost * host = NULL;
+void * screen_data = NULL;
 
 /*
 #define RELIABLE_PACKET ENET_PACKET_FLAG_RELIABLE
@@ -36,8 +37,8 @@ ENetHost * host = NULL;
 
 void broadcast_screen()
 {
-    width = CGDisplayPixelsWide(CGMainDisplayID());
-    height = CGDisplayPixelsHigh(CGMainDisplayID());
+    int width = CGDisplayPixelsWide(CGMainDisplayID());
+    int height = CGDisplayPixelsHigh(CGMainDisplayID());
     CGImageRef image_ref = CGDisplayCreateImage(CGMainDisplayID());
     CGDataProviderRef data_ref = CGImageGetDataProvider(image_ref);
     CFDataRef color_data = CGDataProviderCopyData(data_ref);
