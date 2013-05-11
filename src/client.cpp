@@ -24,8 +24,11 @@
 #include "include_gl.h"
 #include <fstream>
 
+#define MINIZ_HEADER_FILE_ONLY
+#include "miniz.c"
+
 #ifndef GL_BGRA
-#define GL_BGRA 0x80E1
+#define GL_BGR 0x80E0
 #endif
 
 ENetHost * host = NULL;
@@ -43,22 +46,29 @@ void write_file(const char * filename, char * data, unsigned int len)
 
 void set_screen_data(char * data, unsigned int len)
 {
-    write_file("debug.dat", data, len);
+    mz_ulong uncomp_len = 1024 * 768;
+    char * uncompressed = new char[uncomp_len];
+    int ret = mz_uncompress((unsigned char*)uncompressed, &uncomp_len, 
+                            (unsigned char*)data, mz_ulong(len));
+    if (ret != MZ_OK) {
+        delete uncompressed;
+        return;
+    }
+
     has_data = true;
     glBindTexture(GL_TEXTURE_2D, screen_tex);
 
     int w = 1024;
     int h = 768;
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_BGR, w, h, 0, GL_BGR,
-        GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGR,
+        GL_UNSIGNED_BYTE, uncompressed);
+    delete uncompressed;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-
 }
 
 void update_network()

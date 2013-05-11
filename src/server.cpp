@@ -23,12 +23,12 @@
 #include <enet/enet.h>
 #include "timer.h"
 #include "constants.h"
-
 #include <Carbon/Carbon.h>
 
+#define MINIZ_HEADER_FILE_ONLY
+#include "miniz.c"
+
 ENetHost * host = NULL;
-int old_width = -1;
-int old_height = -1;
 
 /*
 #define RELIABLE_PACKET ENET_PACKET_FLAG_RELIABLE
@@ -60,10 +60,21 @@ void broadcast_screen()
     }
     delete screen_data;
 
-    ENetPacket * packet = enet_packet_create(new_data, new_len,
+    char * compressed = new char[new_len];
+    int comp_len = new_len;
+    int ret = mz_compress2(compressed, &comp_len, new_data, new_len, 
+                           MZ_BEST_COMPRESSION);
+    delete new_data;
+
+    if (ret != MZ_OK) {
+        delete compressed;
+        return;
+    }
+
+    ENetPacket * packet = enet_packet_create(compressed, comp_len,
         ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast(host, 0, packet);
-    delete new_data;
+    delete compressed;
 }
 
 void update_network()
