@@ -108,6 +108,7 @@ int main(int argc, char **argv)
             continue;
         send_time = get_time() + UPDATE_RATE;
         broadcast_screen();
+        std::cout << "Broadcast!" << std::endl;
         enet_host_flush(host);
     }
 

@@ -36,6 +36,7 @@ void update_network()
                 // event.peer->data
                 break;
             case ENET_EVENT_TYPE_RECEIVE:
+                std::cout << "Hello!" << std::endl;
                 // peer = event.peer->data;
                 // packet = (char*)event.packet->data, event.packet->dataLength;
                 enet_packet_destroy(event.packet);
@@ -62,6 +63,7 @@ int main(int argc, char **argv)
 
     ENetAddress address;
     enet_address_set_host(&address, "192.168.123.15");
+    address.port = 7171;
     peer = enet_host_connect(host, &address, CHANNEL_COUNT, 0);
 
     std::cout << "Running osxrd client" << std::endl;
