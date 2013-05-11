@@ -45,25 +45,25 @@ void broadcast_screen()
     CFDataRef color_data = CGDataProviderCopyData(data_ref);
     CFRange range = CFRangeMake(0, CFDataGetLength(color_data));
 
-    char * screen_data = malloc(range.length);
+    char * screen_data = new char[range.length];
     CFDataGetBytes(color_data, range, (UInt8*)screen_data);
     CFRelease(color_data);
     CGImageRelease(image_ref);
 
     unsigned int items = range.length / 4;
     unsigned int new_len = items * 3;
-    char * new_data = malloc(new_len);
+    char * new_data = new char[new_len];
     for (int i = 0; i < items; i++) {
         new_data[i * 3] = screen_data[i * 4];
         new_data[i * 3 + 1] = screen_data[i * 4 + 1];
         new_data[i * 3 + 2] = screen_data[i * 4 + 2];
     }
-    free(screen_data);
+    delete screen_data;
 
     ENetPacket * packet = enet_packet_create(new_data, new_len,
         ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast(host, 0, packet);
-    free(new_data);
+    delete new_data;
 }
 
 void update_network()
