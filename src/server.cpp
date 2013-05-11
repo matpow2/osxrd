@@ -64,14 +64,7 @@ void broadcast_area(int x1, int y1, int x2, int y2)
     if (peers == 0)
         return;
 
-    x1 = 0;
-    y1 = 0;
-    x2 = screen_width;
-    y2 = screen_height;
-
-    int line_len = (x2 - x1);
     int len = (x2 - x1) * (y2 - y1) * 3;
-    int s_len = screen_width * screen_height * 3;
 
     for (int y = y1; y < y2; y++)
     for (int x = x1; x < x2; x += CHUNK_SIZE) {
