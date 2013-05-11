@@ -112,6 +112,7 @@ void update_network()
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
                 peers++;
+                enet_peer_throttle_configure(event.peer, 10, 1, 0);
                 broadcast_area(0, 0, screen_width, screen_height);
                 // event.peer->data
                 break;
