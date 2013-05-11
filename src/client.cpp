@@ -27,8 +27,6 @@
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz.c"
 
-#include "jpgd.h"
-
 #ifndef GL_BGRA
 #define GL_BGR 0x80E0
 #endif

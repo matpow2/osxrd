@@ -28,9 +28,6 @@
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz.c"
 
-#include "jpge.h"
-using namespace jpge;
-
 ENetHost * host = NULL;
 
 /*
