@@ -51,7 +51,6 @@ void set_screen_data(char * data, unsigned int len)
     DataStream stream(data, len);
     unsigned int pos = stream.read_uint32();
 
-    mz_ulong uncomp_len = CHUNK_SIZE;
     data += 4;
     len -= 4;
 
@@ -72,7 +71,7 @@ void set_screen_data(char * data, unsigned int len)
 
 void update_network()
 {
-    int max_events = 500;
+    int max_events = 1;
     ENetEvent event;
     while (max_events > 0) {
         if (enet_host_service(host, &event, 0) <= 0)

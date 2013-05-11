@@ -42,8 +42,7 @@ void broadcast_chunk(char * data, unsigned int pos, int len)
 {
     DataStream stream;
     stream.write_uint32(pos);
-    stream.write(data, len);
-
+    stream.write(data + pos, len);
     ENetPacket * packet = enet_packet_create(stream.data, stream.size,
         ENET_PACKET_FLAG_UNSEQUENCED);
     enet_host_broadcast(host, 0, packet);
@@ -132,6 +131,7 @@ int main(int argc, char **argv)
         if (get_time() >= send_time) {
             send_time = get_time() + UPDATE_RATE;
             broadcast_screen();
+            std::cout << "sent!" << std::endl;
         }
         // enet_host_flush(host);
     }
