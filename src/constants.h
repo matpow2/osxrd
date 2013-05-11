@@ -1,0 +1,6 @@
+#ifndef OSXRD_CONSTANTS_H
+#define OSXRD_CONSTANTS_H
+
+#define CHANNEL_COUNT 5
+
+#endif // OSXRD_CONSTANTS_H
