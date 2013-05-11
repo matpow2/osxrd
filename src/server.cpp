@@ -24,7 +24,36 @@
 #include "timer.h"
 #include "constants.h"
 
+#include <Carbon/Carbon.h>
+
 ENetHost * host = NULL;
+
+/*
+#define RELIABLE_PACKET ENET_PACKET_FLAG_RELIABLE
+#define UNRELIABLE_PACKET
+#define UNSEQUENCED_PACKET ENET_PACKET_FLAG_UNSEQUENCED
+*/
+
+void broadcast_screen()
+{
+    width = CGDisplayPixelsWide(CGMainDisplayID());
+    height = CGDisplayPixelsHigh(CGMainDisplayID());
+    CGImageRef image_ref = CGDisplayCreateImage(CGMainDisplayID());
+    CGDataProviderRef data_ref = CGImageGetDataProvider(image_ref);
+    CFDataRef color_data = CGDataProviderCopyData(data_ref);
+    CFRange range = CFRangeMake(0, CFDataGetLength(color_data));
+    
+    if (screen_data != NULL)
+        free(screen_data);
+
+    screen_data = malloc(range.length);
+    CFDataGetBytes(color_data, range, (UInt8*)screen_data);
+    CFRelease(color_data);
+    CGImageRelease(image_ref);
+    ENetPacket * packet = enet_packet_create(screen_data, range.length,
+        ENET_PACKET_FLAG_UNSEQUENCED);
+    enet_host_broadcast(host, 0, packet);
+}
 
 void update_network()
 {
@@ -48,8 +77,11 @@ void update_network()
     }
 }
 
+#define UPDATE_RATE (1 / 30.0f)
+
 int main(int argc, char **argv)
 {
+    init_time();
     enet_initialize();
 
     ENetAddress address;
@@ -65,8 +97,17 @@ int main(int argc, char **argv)
 
     enet_host_compress_with_range_coder(host);
 
+    std::cout << "Running osxrd server on port " << address.port << std::endl;
+
+    double send_time = get_time();
+
     while (true) {
         update_network();
+        if (get_time() < send_time)
+            continue;
+        send_time = get_time() + UPDATE_RATE;
+        broadcast_screen();
+        enet_host_flush(host);
     }
 
     enet_host_destroy(host);
