@@ -23,6 +23,7 @@
 #include "constants.h"
 #include "include_gl.h"
 #include <fstream>
+#include "tinythread.h"
 
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz.c"
@@ -38,6 +39,7 @@ ENetPeer * peer = NULL;
 GLFWwindow * window = NULL;
 char * screen_data;
 GLuint screen_tex;
+bool application_exit = false;
 
 void write_file(const char * filename, char * data, unsigned int len)
 {
@@ -57,12 +59,12 @@ void set_screen_data(char * data, unsigned int len)
     memcpy(screen_data + pos * 3, data, len);
 }
 
-void update_network()
+void network_loop(void * arg)
 {
     ENetEvent event;
-    while (true) {
-        if (enet_host_service(host, &event, 0) <= 0)
-            break;
+    while (!application_exit) {
+        if (enet_host_service(host, &event, 10) <= 0)
+            continue;
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
                 // event.peer->data
@@ -138,6 +140,7 @@ void draw()
 
 int main(int argc, char **argv)
 {
+    init_time();
     enet_initialize();
 
     host = enet_host_create(NULL, 1, CHANNEL_COUNT, 0, 0);
@@ -181,6 +184,9 @@ int main(int argc, char **argv)
     glGenTextures(1, &screen_tex);
     screen_data = new char[1024 * 768 * 3];
 
+    // start new thread for networking
+    tthread::thread network_thread(network_loop, NULL);
+
     std::cout << "Running osxrd client" << std::endl;
 
     double t = get_time();
@@ -189,9 +195,12 @@ int main(int argc, char **argv)
         glfwPollEvents();
         if (glfwWindowShouldClose(window))
             break;
-        update_network();
         draw();
+        std::cout << "FPS: " << (1 / (get_time() - t)) << std::endl;
+        t = get_time();
     }
 
+    application_exit = true;
+    network_thread.join();
     enet_host_destroy(host);
 }

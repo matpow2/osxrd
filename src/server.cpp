@@ -57,16 +57,16 @@ void broadcast_chunk(int x, int y, int len)
     enet_host_broadcast(host, 0, packet);
 }
 
-#define CHUNK_SIZE 120
-
 void broadcast_area(int x1, int y1, int x2, int y2)
 {
     if (peers == 0)
         return;
 
+    int chunk_size = int((host->mtu / 3.0f) * 0.95f);
+
     for (int y = y1; y < y2; y++)
-    for (int x = x1; x < x2; x += CHUNK_SIZE) {
-        int len = std::min(x2 - x, CHUNK_SIZE);
+    for (int x = x1; x < x2; x += chunk_size) {
+        int len = std::min(x2 - x, chunk_size);
         broadcast_chunk(x, y, len);
     }
 }
@@ -185,9 +185,7 @@ int main(int argc, char **argv)
 
     while (true) {
         update_network();
-        double t = get_time();
         RunCurrentEventLoop(kEventDurationSecond * UPDATE_RATE);
-        std::cout << "update took: " << (get_time() - t) << std::endl;
     }
 
     enet_host_destroy(host);

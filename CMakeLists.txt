@@ -18,6 +18,7 @@ set(CMAKE_MODULE_PATH
 )
 
 set(COMMONSRCS
+    ${SRC_DIR}/tinythread.cpp
     ${SRC_DIR}/datastream.cpp
     ${SRC_DIR}/miniz.c
     ${SRC_DIR}/timer.cpp
@@ -32,12 +33,6 @@ set(SERVERSRCS
     ${COMMONSRCS}
     ${SRC_DIR}/server.cpp
 )
-
-if(WIN32)
-    set(CLIENTSRCS
-        ${CLIENTSRCS}
-    )
-endif()
 
 # dependencies
 
